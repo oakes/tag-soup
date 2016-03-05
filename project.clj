@@ -1,5 +1,5 @@
 (defproject tag-soup "1.0.0-SNAPSHOT"
-  :description "A Clojure(Script) library to parse code into a list of tags"
+  :description "A library to parse code into a list of tags"
   :url "https://github.com/oakes/mistakes-were-made"
   :license {:name "Public Domain"
             :url "http://unlicense.org/UNLICENSE"}

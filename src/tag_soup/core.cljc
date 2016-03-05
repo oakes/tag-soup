@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]
             [#?(:clj clojure.tools.reader
                 :cljs cljs.tools.reader)
-             :refer [read *wrap-value-and-add-metadata?*]]
+             :as r :refer [*wrap-value-and-add-metadata?*]]
             [#?(:clj clojure.tools.reader.reader-types
                 :cljs cljs.tools.reader.reader-types)
              :refer [indexing-push-back-reader]]
@@ -15,7 +15,7 @@
   [reader :- Any]
   (try
     (binding [*wrap-value-and-add-metadata?* true]
-      (read reader false nil))
+      (r/read reader false nil))
     (catch #?(:clj Exception :cljs js/Error) e e)))
 
 (def ^:const special-indent #{'-> '->> 'cond-> 'cond->> 'some-> 'some->>})
