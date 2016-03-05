@@ -90,7 +90,7 @@
   [tags :- [{Keyword Any}]
    cursor-line :- Int]
   (let [tags-before-cursor (take-while (fn [tag]
-                                         (let [line (or (:line tag) (:end-line tag))]
+                                         (let [line (or (:line tag) (:end-line tag) -1)]
                                            (< line (inc cursor-line))))
                                        tags)]
     (or (->> tags-before-cursor reverse (some :next-line-spaces)) 0)))
