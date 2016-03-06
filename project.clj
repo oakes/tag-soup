@@ -3,7 +3,7 @@
   :url "https://github.com/oakes/mistakes-were-made"
   :license {:name "Public Domain"
             :url "http://unlicense.org/UNLICENSE"}
-  :dependencies [[org.clojars.oakes/tools.reader "1.0.0-SNAPSHOT"
+  :dependencies [[org.clojars.oakes/tools.reader "1.0.0-2016.03.06"
                   :exclusions [org.clojure/clojure]]
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.7.228"
