@@ -53,7 +53,7 @@
        
        ; a key-value pair from a map
        (and (coll? token) (nil? (meta token)))
-       (map tag-list token)
+       (map #(tag-list % parent-spaces) token)
        
        ; a valid token
        :else
