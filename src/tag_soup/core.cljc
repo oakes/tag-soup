@@ -89,8 +89,37 @@
   "Returns the number of spaces the given line should be indented."
   [tags :- [{Keyword Any}]
    cursor-line :- Int]
-  (let [tags-before-cursor (take-while (fn [tag]
-                                         (let [line (or (:line tag) (:end-line tag) -1)]
-                                           (< line (inc cursor-line))))
-                                       tags)]
-    (or (->> tags-before-cursor reverse (some :next-line-spaces)) 0)))
+  (or (->> tags
+           (take-while (fn [tag]
+                         (let [line (or (:line tag) (:end-line tag) -1)]
+                           (< line (inc cursor-line)))))
+           reverse
+           (some :next-line-spaces))
+    0))
+
+(s/defn change-indent-for-line :- Int
+  "Returns the number of spaces the given line should be indented back or forwards."
+  [tags :- [{Keyword Any}]
+   cursor-line :- Int
+   reverse? :- Bool]
+  (let [[tags-before
+         tags-on-line] (partition-by
+                         (fn [tag]
+                           (let [line (or (:line tag) (:end-line tag) -1)]
+                             (= line (inc cursor-line))))
+                         tags)
+        current-indent (dec (or (some :column tags-on-line) 1))
+        default-indent (if reverse? 0 (+ 2 current-indent))
+        valid? (if reverse? < >)]
+    (or (when (> current-indent 1)
+          (loop [tags (reverse tags-before)]
+            (if-let [tag (first tags)]
+              (cond
+                (some-> tag :next-line-spaces (valid? current-indent))
+                (:next-line-spaces tag)
+                (= 1 (:column tag))
+                default-indent
+                :else
+                (recur (rest tags)))
+              default-indent)))
+      default-indent)))
