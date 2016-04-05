@@ -112,14 +112,13 @@
         default-indent (if reverse? 0 (+ 2 current-indent))
         valid? (if reverse? < >)
         choose (if reverse? first last)]
-    (or (when (> current-indent 1)
-          (->> tags-before
-               reverse
-               (take-while (fn [tag]
-                             (not= 1 (:column tag))))
-               (filter (fn [tag]
-                         (and (some-> (:next-line-spaces tag) (valid? current-indent))
-                              (some-> (:end-column tag) dec (valid? current-indent)))))
-               (map :next-line-spaces)
-               choose))
+    (or (->> tags-before
+             reverse
+             (take-while (fn [tag]
+                           (not= 1 (:column tag))))
+             (filter (fn [tag]
+                       (and (some-> (:next-line-spaces tag) (valid? current-indent))
+                            (some-> (:end-column tag) dec (valid? current-indent)))))
+             (map :next-line-spaces)
+             choose)
       default-indent)))
