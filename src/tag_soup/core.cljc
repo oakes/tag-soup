@@ -59,24 +59,27 @@
        :else
        (let [{:keys [line column end-line end-column wrapped?]} (meta token)
              value (if wrapped? (first token) token)]
-         [; begin tag
-          {:line line :column column :indent (dec column) :value value}
-          (if (coll? value)
-            (let [delimiter-size (if (set? value) 2 1)
-                  new-end-column (+ column delimiter-size)
-                  adjustment (adjust-indent value)
-                  next-line-indent (+ (dec column) delimiter-size adjustment)]
-              [; open delimiter tags
-               {:line line :column column :delimiter? true}
-               {:end-line line :end-column new-end-column :indent next-line-indent :next-line-indent next-line-indent}
-               ; child tags
-               (map #(tag-list % next-line-indent) value)
-               ; close delimiter tags
-               {:line end-line :column (dec end-column) :delimiter? true}
-               {:end-line end-line :end-column end-column :next-line-indent parent-spaces}])
-            [])
-           ; end tag
-          {:end-line end-line :end-column end-column :end-tag? true}])))))
+         (if (coll? value)
+           (let [delimiter-size (if (set? value) 2 1)
+                 new-end-column (+ column delimiter-size)
+                 adjustment (adjust-indent value)
+                 next-line-indent (+ (dec column) delimiter-size adjustment)]
+             [; begin tag
+              {:line line :column column :value value}
+              ; open delimiter tags
+              {:line line :column column :delimiter? true}
+              {:end-line line :end-column new-end-column :indent next-line-indent :next-line-indent next-line-indent}
+              ; child tags
+              (map #(tag-list % next-line-indent) value)
+              ; close delimiter tags
+              {:line end-line :column (dec end-column) :delimiter? true}
+              {:end-line end-line :end-column end-column :next-line-indent parent-spaces}
+              ; end tag
+              {:end-line end-line :end-column end-column :end-tag? true}])
+           [; begin tag
+            {:line line :column column :value value :indent (dec column)}
+            ; end tag
+            {:end-line end-line :end-column end-column :end-tag? true}]))))))
 
 (s/defn str->tags :- [{Keyword Any}]
   "Returns the tags for the given string containing code."
