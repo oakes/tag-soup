@@ -77,7 +77,7 @@
               ; end tag
               {:end-line end-line :end-column end-column :end-tag? true}])
            [; begin tag
-            {:line line :column column :value value :indent (dec column)}
+            {:line line :column column :value value :indent (when column (dec column))}
             ; end tag
             {:end-line end-line :end-column end-column :end-tag? true}]))))))
 
