@@ -18,17 +18,30 @@
       (r/read reader false nil))
     (catch #?(:clj Exception :cljs js/Error) e e)))
 
-(def ^:const special-indent #{'-> '->> 'cond-> 'cond->> 'some-> 'some->>})
+(def ^:const special-indent
+  #{'-> '->>
+    'cond-> 'cond->>
+    'some-> 'some->>
+    'and 'or})
+
+(s/defn unwrap-value :- Any
+  [value :- Any]
+  (if (-> value meta :wrapped?)
+    (first value)
+    value))
 
 (s/defn adjust-indent :- Int
   "Returns how much the indent should be adjusted for the given token."
   [token :- Any]
   (if (list? token)
-    (let [first-val (first token)]
+    (let [first-val (-> token first unwrap-value)]
       (cond
         ; multi-arity functions
         (vector? first-val)
         0
+        ; :require and other keywords in ns
+        (keyword? first-val)
+        (inc (count (str first-val)))
         ; threading macros
         (contains? special-indent first-val)
         (inc (count (str first-val)))
@@ -57,8 +70,8 @@
        
        ; a valid token
        :else
-       (let [{:keys [line column end-line end-column wrapped?]} (meta token)
-             value (if wrapped? (first token) token)]
+       (let [{:keys [line column end-line end-column]} (meta token)
+             value (unwrap-value token)]
          (if (coll? value)
            (let [delimiter-size (if (set? value) 2 1)
                  new-end-column (+ column delimiter-size)
