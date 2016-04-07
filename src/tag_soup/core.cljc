@@ -117,21 +117,19 @@
   [tag :- {Keyword Any}]
   (or (:line tag) (:end-line tag) -1))
 
-(s/defn filter-tags :- [{Keyword Any}]
+(s/defn get-tags-before-line :- [{Keyword Any}]
   [tags :- [{Keyword Any}]
-   line :- Int
-   compare-fn :- Any]
+   line :- Int]
   (->> tags
-       (filter #(compare-fn (get-line %) (inc line)))
+       (filter #(< (get-line %) (inc line)))
        (sort-by get-line)))
 
 (s/defn back-indent-for-line :- Int
   "Returns the number of spaces the given line should be indented back."
   [tags :- [{Keyword Any}]
-   cursor-line :- Int]
-  (let [tags-before (filter-tags tags cursor-line <)
-        tags-on-line (filter-tags tags cursor-line =)
-        current-indent (dec (or (some :column tags-on-line) 1))]
+   cursor-line :- Int
+   current-indent :- Int]
+  (let [tags-before (get-tags-before-line tags cursor-line)]
     (loop [tags (reverse tags-before)]
       (if-let [tag (first tags)]
         (if-let [indent (:indent tag)]
@@ -144,10 +142,9 @@
 (s/defn forward-indent-for-line :- Int
   "Returns the number of spaces the given line should be indented forward."
   [tags :- [{Keyword Any}]
-   cursor-line :- Int]
-  (let [tags-before (filter-tags tags cursor-line <)
-        tags-on-line (filter-tags tags cursor-line =)
-        current-indent (dec (or (some :column tags-on-line) 1))]
+   cursor-line :- Int
+   current-indent :- Int]
+  (let [tags-before (get-tags-before-line tags cursor-line)]
     (loop [tags (reverse tags-before)
            last-indent -1]
       (if-let [tag (first tags)]
