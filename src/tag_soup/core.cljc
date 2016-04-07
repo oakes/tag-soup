@@ -42,7 +42,7 @@
   ([token :- Any]
    (tag-list token 0))
   ([token :- Any
-    parent-spaces :- Int]
+    parent-indent :- Int]
    (flatten
      (cond
        ; an error
@@ -53,7 +53,7 @@
        
        ; a key-value pair from a map
        (and (coll? token) (nil? (meta token)))
-       (map #(tag-list % parent-spaces) token)
+       (map #(tag-list % parent-indent) token)
        
        ; a valid token
        :else
@@ -65,19 +65,19 @@
                  adjustment (adjust-indent value)
                  next-line-indent (+ (dec column) delimiter-size adjustment)]
              [; begin tag
-              {:line line :column column :value value}
+              {:line line :column column :value value :indent next-line-indent}
               ; open delimiter tags
               {:line line :column column :delimiter? true}
-              {:end-line line :end-column new-end-column :indent next-line-indent :next-line-indent next-line-indent}
+              {:end-line line :end-column new-end-column :next-line-indent next-line-indent}
               ; child tags
               (map #(tag-list % next-line-indent) value)
               ; close delimiter tags
               {:line end-line :column (dec end-column) :delimiter? true}
-              {:end-line end-line :end-column end-column :next-line-indent parent-spaces}
+              {:end-line end-line :end-column end-column :next-line-indent parent-indent}
               ; end tag
               {:end-line end-line :end-column end-column :end-tag? true}])
            [; begin tag
-            {:line line :column column :value value :indent (when column (dec column))}
+            {:line line :column column :value value :indent (when column (max parent-indent (dec column)))}
             ; end tag
             {:end-line end-line :end-column end-column :end-tag? true}]))))))
 
