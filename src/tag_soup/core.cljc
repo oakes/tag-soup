@@ -71,17 +71,18 @@
        ; a valid token
        :else
        (let [{:keys [line column end-line end-column]} (meta token)
-             value (unwrap-value token)]
+             value (unwrap-value token)
+             indent (when column (max parent-indent (dec column)))]
          (if (coll? value)
            (let [delimiter-size (if (set? value) 2 1)
                  new-end-column (+ column delimiter-size)
                  adjustment (adjust-indent value)
                  next-line-indent (+ (dec column) delimiter-size adjustment)]
              [; begin tag
-              {:line line :column column :value value :indent next-line-indent}
+              {:line line :column column :value value :indent indent}
               ; open delimiter tags
               {:line line :column column :delimiter? true}
-              {:end-line line :end-column new-end-column :next-line-indent next-line-indent}
+              {:end-line line :end-column new-end-column :next-line-indent next-line-indent :indent next-line-indent}
               ; child tags
               (map #(tag-list % next-line-indent) value)
               ; close delimiter tags
@@ -90,7 +91,7 @@
               ; end tag
               {:end-line end-line :end-column end-column :end-tag? true}])
            [; begin tag
-            {:line line :column column :value value :indent (when column (max parent-indent (dec column)))}
+            {:line line :column column :value value :indent indent}
             ; end tag
             {:end-line end-line :end-column end-column :end-tag? true}]))))))
 
