@@ -170,6 +170,6 @@
             :else
             (recur (rest tags) max-tab-stop tab-stop))
           (recur (rest tags) max-tab-stop tab-stop))
-        (if (or (neg? tab-stop) (<= tab-stop current-indent))
+        (if (<= tab-stop current-indent)
           (+ current-indent 2)
           tab-stop)))))
