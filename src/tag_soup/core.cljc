@@ -79,7 +79,7 @@
                  adjustment (adjust-indent value)
                  next-line-indent (+ (dec column) delimiter-size adjustment)]
              [; begin tag
-              {:line line :column column :value value :indent indent}
+              {:line line :column column :value value :indent indent :skip-indent? true}
               ; open delimiter tags
               {:line line :column column :delimiter? true}
               {:end-line line :end-column new-end-column :next-line-indent next-line-indent :indent next-line-indent}
@@ -125,8 +125,7 @@
   [tags :- [{Keyword Any}]
    cursor-line :- Int]
   (or (->> tags
-           (take-while (fn [tag]
-                         (< (get-line tag) (inc cursor-line))))
+           (take-while #(< (get-line %) (inc cursor-line)))
            reverse
            (some :next-line-indent))
     0))
@@ -137,13 +136,16 @@
    cursor-line :- Int
    current-indent :- Int]
   (let [tags-before (get-tags-before-line tags cursor-line)]
-    (loop [tags (reverse tags-before)]
+    (loop [tags (reverse tags-before)
+           tab-stop current-indent]
       (if-let [tag (first tags)]
         (if-let [indent (:indent tag)]
-          (if (< indent current-indent)
-            indent
-            (recur (rest tags)))
-          (recur (rest tags)))
+          (if (< indent tab-stop)
+            (if (:skip-indent? tag)
+              (recur (rest tags) (inc indent))
+              indent)
+            (recur (rest tags) tab-stop))
+          (recur (rest tags) tab-stop))
         (- current-indent 2)))))
 
 (s/defn forward-indent-for-line :- Int
@@ -153,17 +155,18 @@
    current-indent :- Int]
   (let [tags-before (get-tags-before-line tags cursor-line)]
     (loop [tags (reverse tags-before)
-           last-indent -1]
+           max-tab-stop -1
+           tab-stop -1]
       (if-let [tag (first tags)]
         (if-let [indent (:indent tag)]
           (cond
             (<= indent current-indent)
-            (recur [] last-indent)
-            (or (neg? last-indent) (< current-indent indent last-indent))
-            (recur (rest tags) indent)
+            (recur [] max-tab-stop tab-stop)
+            (or (neg? max-tab-stop) (< current-indent indent max-tab-stop))
+            (recur (rest tags) (inc indent) (if (:skip-indent? tag) tab-stop indent))
             :else
-            (recur (rest tags) last-indent))
-          (recur (rest tags) last-indent))
-        (if (<= last-indent current-indent)
+            (recur (rest tags) max-tab-stop tab-stop))
+          (recur (rest tags) max-tab-stop tab-stop))
+        (if (or (neg? tab-stop) (<= tab-stop current-indent))
           (+ current-indent 2)
-          last-indent)))))
+          tab-stop)))))
