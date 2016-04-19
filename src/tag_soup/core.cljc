@@ -137,15 +137,15 @@
    current-indent :- Int]
   (let [tags-before (get-tags-before-line tags cursor-line)]
     (loop [tags (reverse tags-before)
-           tab-stop current-indent]
+           max-tab-stop current-indent]
       (if-let [tag (first tags)]
         (if-let [indent (:indent tag)]
-          (if (< indent tab-stop)
+          (if (< indent max-tab-stop)
             (if (:skip-indent? tag)
               (recur (rest tags) (inc indent))
               indent)
-            (recur (rest tags) tab-stop))
-          (recur (rest tags) tab-stop))
+            (recur (rest tags) max-tab-stop))
+          (recur (rest tags) max-tab-stop))
         (- current-indent 2)))))
 
 (s/defn forward-indent-for-line :- Int
