@@ -102,28 +102,34 @@
     (sequence (comp (take-while some?) (mapcat tag-list))
               (repeatedly (partial read-safe reader)))))
 
+(s/defn get-line :- Int
+  "Returns the line number of the given tag, or -1 if none exists."
+  [tag :- {Keyword Any}]
+  (or (:line tag) (:end-line tag) -1))
+
+(s/defn get-column :- Int
+  "Returns the column number of the given tag, or -1 if none exists."
+  [tag :- {Keyword Any}]
+  (or (:column tag) (:end-column tag) -1))
+
+(s/defn get-tags-before-line :- [{Keyword Any}]
+  "Returns the tags before the given line."
+  [tags :- [{Keyword Any}]
+   line :- Int]
+  (->> tags
+       (filter #(< (get-line %) (inc line)))
+       (sort-by get-line)))
+
 (s/defn indent-for-line :- Int
   "Returns the number of spaces the given line should be indented."
   [tags :- [{Keyword Any}]
    cursor-line :- Int]
   (or (->> tags
            (take-while (fn [tag]
-                         (let [line (or (:line tag) (:end-line tag) -1)]
-                           (< line (inc cursor-line)))))
+                         (< (get-line tag) (inc cursor-line))))
            reverse
            (some :next-line-indent))
     0))
-
-(s/defn get-line :- Int
-  [tag :- {Keyword Any}]
-  (or (:line tag) (:end-line tag) -1))
-
-(s/defn get-tags-before-line :- [{Keyword Any}]
-  [tags :- [{Keyword Any}]
-   line :- Int]
-  (->> tags
-       (filter #(< (get-line %) (inc line)))
-       (sort-by get-line)))
 
 (s/defn back-indent-for-line :- Int
   "Returns the number of spaces the given line should be indented back."
