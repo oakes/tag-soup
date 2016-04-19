@@ -22,7 +22,10 @@
   #{'-> '->>
     'cond-> 'cond->>
     'some-> 'some->>
-    'and 'or})
+    'and 'or
+    '+ '- '* '/
+    '= 'not= '==
+    '> '< '>= '<=})
 
 (s/defn unwrap-value :- Any
   [value :- Any]
@@ -100,7 +103,7 @@
   [text :- Str]
   (let [reader (indexing-push-back-reader text)]
     (sequence (comp (take-while some?) (mapcat tag-list))
-              (repeatedly (partial read-safe reader)))))
+      (repeatedly (partial read-safe reader)))))
 
 (s/defn get-line :- Int
   "Returns the line number of the given tag, or -1 if none exists."
