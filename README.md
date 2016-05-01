@@ -1,6 +1,6 @@
 ## Introduction
 
-A library that uses tools.reader to parse clojure code into a list of maps describing each token.
+A Clojure and ClojureScript library that uses tools.reader to parse clojure code into a list of maps describing each token.
 
 ## Licensing
 
