@@ -1,6 +1,6 @@
 (defproject tag-soup "1.1.6-SNAPSHOT"
   :description "A library to parse code into a list of tags"
-  :url "https://github.com/oakes/mistakes-were-made"
+  :url "https://github.com/oakes/tag-soup"
   :license {:name "Public Domain"
             :url "http://unlicense.org/UNLICENSE"}
   :dependencies [[org.clojars.oakes/tools.reader "1.0.0-2016.04.06"
