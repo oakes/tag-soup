@@ -6,13 +6,11 @@
                   [adzerk/boot-reload "0.3.1" :scope "test"]
                   [pandeiro/boot-http "0.6.3-SNAPSHOT" :scope "test"]
                   ; project deps
-                  [org.clojars.oakes/tools.reader "1.0.0-2016.04.06"
+                  [org.clojars.oakes/tools.reader "1.0.0-2016.05.02"
                    :exclusions [org.clojure/clojure]]
                   [org.clojure/clojure "1.8.0"]
-                  [org.clojure/clojurescript "1.7.228"
-                   :exclusions [org.clojure/tools.reader]]
-                  [org.clojure/core.async "0.2.374"
-                   :exclusions [org.clojure/tools.reader]]
+                  [org.clojure/clojurescript "1.7.228"]
+                  [org.clojure/core.async "0.2.374"]
                   [prismatic/schema "0.4.3"]])
 
 (require

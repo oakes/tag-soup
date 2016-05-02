@@ -1,10 +1,10 @@
 (ns tag-soup.core
   (:require [clojure.string :as str]
-            [#?(:clj clojure.tools.reader
-                :cljs cljs.tools.reader)
+            [#?(:clj oakclojure.tools.reader
+                :cljs oakcljs.tools.reader)
              :as r :refer [*wrap-value-and-add-metadata?*]]
-            [#?(:clj clojure.tools.reader.reader-types
-                :cljs cljs.tools.reader.reader-types)
+            [#?(:clj oakclojure.tools.reader.reader-types
+                :cljs oakcljs.tools.reader.reader-types)
              :refer [indexing-push-back-reader]]
             [schema.core :refer [maybe either Any Str Int Keyword Bool]
              #?@(:clj [:as s])])
@@ -15,7 +15,7 @@
   [reader :- Any]
   (try
     (binding [*wrap-value-and-add-metadata?* true]
-      (r/read reader false nil))
+      (r/read {:read-cond :preserve :eof nil} reader))
     (catch #?(:clj Exception :cljs js/Error) e e)))
 
 (def ^:const special-indent
