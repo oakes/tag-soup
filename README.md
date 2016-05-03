@@ -1,3 +1,5 @@
+[![Clojars Project](https://img.shields.io/clojars/v/tag-soup.svg)](https://clojars.org/tag-soup)
+
 ## Introduction
 
 A Clojure and ClojureScript library that uses tools.reader to parse clojure code into a list of maps describing each token. Example use:
