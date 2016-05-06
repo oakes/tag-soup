@@ -103,7 +103,7 @@
     (take-while some?)
     (mapcat tag-list)))
 
-(s/defn str->tags :- [{Keyword Any}]
+(s/defn code->tags :- [{Keyword Any}]
   "Returns the tags for the given string containing code."
   [text :- Str]
   (let [reader (indexing-push-back-reader text)]
