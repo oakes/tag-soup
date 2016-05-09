@@ -108,7 +108,7 @@
   "Returns the tags for the given string containing code."
   [text :- Str]
   (let [reader (indexing-push-back-reader text)]
-    (sequence form->tags (repeatedly (partial read-safe reader)))))
+    (into [] form->tags (repeatedly (partial read-safe reader)))))
 
 (s/defn get-line :- Int
   "Returns the line number of the given tag, or -1 if none exists."
