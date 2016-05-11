@@ -1,4 +1,4 @@
-(defproject tag-soup "1.3.0"
+(defproject tag-soup "1.3.1-SNAPSHOT"
   :description "A library to parse code into a list of tags"
   :url "https://github.com/oakes/tag-soup"
   :license {:name "Public Domain"
