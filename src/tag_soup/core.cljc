@@ -81,38 +81,40 @@
      
      ; a valid token
      :else
-     (let [{:keys [line column end-line end-column]} (meta token)
-           value (unwrap-value token)
-           indent (when column (max parent-indent (dec column)))
-           top-level? (= parent-indent 0)]
-       (if (coll? value)
-         (let [delimiter-size (if (set? value) 2 1)
-               new-end-column (+ column delimiter-size)
-               adjustment (adjust-indent value)
-               next-line-indent (+ (dec column) delimiter-size adjustment)]
-           (as-> results-map $
-                 (assoc! $ line
-                   (-> (get $ line [])
-                       (conj {:begin? true :column column :value value :indent indent :top-level? top-level? :skip-indent? true})
-                       (conj {:delimiter? true :column column})
-                       (conj {:end? true :column new-end-column :next-line-indent next-line-indent :indent next-line-indent})))
-                 (reduce
-                   (fn [results-map token]
-                     (tag-map token results-map next-line-indent))
-                   $
-                   value)
-                 (assoc! $ end-line
-                   (-> (get $ end-line [])
-                       (conj {:delimiter? true :column (dec end-column)})
-                       (conj {:end? true :column end-column :next-line-indent parent-indent})
-                       (conj {:end? true :column end-column})))))
-         (as-> results-map $
-               (assoc! $ line
-                 (conj (get $ line [])
-                   {:begin? true :column column :value value :indent indent :top-level? top-level?}))
-               (assoc! $ end-line
-                 (conj (get $ end-line [])
-                   {:end? true :column end-column}))))))))
+     (let [{:keys [line column end-line end-column]} (meta token)]
+       (if-not (and line column end-line end-column)
+         results-map
+         (let [value (unwrap-value token)
+               indent (max parent-indent (dec column))
+               top-level? (= parent-indent 0)]
+           (if (coll? value)
+             (let [delimiter-size (if (set? value) 2 1)
+                   new-end-column (+ column delimiter-size)
+                   adjustment (adjust-indent value)
+                   next-line-indent (+ (dec column) delimiter-size adjustment)]
+               (as-> results-map $
+                     (assoc! $ line
+                       (-> (get $ line [])
+                           (conj {:begin? true :column column :value value :indent indent :top-level? top-level? :skip-indent? true})
+                           (conj {:delimiter? true :column column})
+                           (conj {:end? true :column new-end-column :next-line-indent next-line-indent :indent next-line-indent})))
+                     (reduce
+                       (fn [results-map token]
+                         (tag-map token results-map next-line-indent))
+                       $
+                       value)
+                     (assoc! $ end-line
+                       (-> (get $ end-line [])
+                           (conj {:delimiter? true :column (dec end-column)})
+                           (conj {:end? true :column end-column :next-line-indent parent-indent})
+                           (conj {:end? true :column end-column})))))
+             (as-> results-map $
+                   (assoc! $ line
+                     (conj (get $ line [])
+                       {:begin? true :column column :value value :indent indent :top-level? top-level?}))
+                   (assoc! $ end-line
+                     (conj (get $ end-line [])
+                       {:end? true :column end-column}))))))))))
 
 (s/defn code->tags :- {Int {Keyword Any}}
   "Returns the tags for the given string containing code."
