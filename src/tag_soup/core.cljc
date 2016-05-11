@@ -22,6 +22,7 @@
   #{'-> '->>
     'cond-> 'cond->>
     'some-> 'some->>
+    'as->
     'and 'or
     '+ '- '* '/
     '= 'not= '==
@@ -53,97 +54,101 @@
         1))
     0))
 
-(s/defn tag-list :- [{Keyword Any}]
-  "Returns a list of maps describing each tag."
-  ([token :- Any]
-   (tag-list token 0))
+(s/defn tag-map :- Any
+  "Returns a transient map containing the tags, organized by line number."
   ([token :- Any
+    results-map :- Any]
+   (tag-map token results-map 0))
+  ([token :- Any
+    results-map :- Any
     parent-indent :- Int]
-   (flatten
-     (cond
-       ; an error
-       (instance? #?(:clj Exception :cljs js/Error) token)
-       [(assoc #?(:clj {} :cljs (.-data token))
-               :message #?(:clj (.getMessage token) :cljs (.-message token))
-               :error? true)]
-       
-       ; a key-value pair from a map
-       (and (coll? token) (nil? (meta token)))
-       (map #(tag-list % parent-indent) token)
-       
-       ; a valid token
-       :else
-       (let [{:keys [line column end-line end-column]} (meta token)
-             value (unwrap-value token)
-             indent (when column (max parent-indent (dec column)))
-             top-level? (= parent-indent 0)]
-         (if (coll? value)
-           (let [delimiter-size (if (set? value) 2 1)
-                 new-end-column (+ column delimiter-size)
-                 adjustment (adjust-indent value)
-                 next-line-indent (+ (dec column) delimiter-size adjustment)]
-             [; begin tag
-              {:line line :column column :value value :indent indent :top-level? top-level? :skip-indent? true}
-              ; open delimiter tags
-              {:line line :column column :delimiter? true}
-              {:end-line line :end-column new-end-column :next-line-indent next-line-indent :indent next-line-indent}
-              ; child tags
-              (map #(tag-list % next-line-indent) value)
-              ; close delimiter tags
-              {:line end-line :column (dec end-column) :delimiter? true}
-              {:end-line end-line :end-column end-column :next-line-indent parent-indent}
-              ; end tag
-              {:end-line end-line :end-column end-column :end-tag? true}])
-           [; begin tag
-            {:line line :column column :value value :indent indent :top-level? top-level?}
-            ; end tag
-            {:end-line end-line :end-column end-column :end-tag? true}]))))))
+   (cond
+     ; an error
+     (instance? #?(:clj Exception :cljs js/Error) token)
+     #?(:clj results-map
+        :cljs (let [{:keys [line column]} (.-data token)]
+                (assoc! results-map line
+                  (conj (get results-map line [])
+                    {:error? true :message (.-message token) :column column}))))
+     
+     ; a key-value pair from a map
+     (and (coll? token) (nil? (meta token)))
+     (reduce
+       (fn [results-map token]
+         (tag-map token results-map parent-indent))
+       results-map
+       token)
+     
+     ; a valid token
+     :else
+     (let [{:keys [line column end-line end-column]} (meta token)
+           value (unwrap-value token)
+           indent (when column (max parent-indent (dec column)))
+           top-level? (= parent-indent 0)]
+       (if (coll? value)
+         (let [delimiter-size (if (set? value) 2 1)
+               new-end-column (+ column delimiter-size)
+               adjustment (adjust-indent value)
+               next-line-indent (+ (dec column) delimiter-size adjustment)]
+           (as-> results-map $
+                 (assoc! $ line
+                   (-> (get $ line [])
+                       (conj {:begin? true :column column :value value :indent indent :top-level? top-level? :skip-indent? true})
+                       (conj {:delimiter? true :column column})
+                       (conj {:end? true :column new-end-column :next-line-indent next-line-indent :indent next-line-indent})))
+                 (reduce
+                   (fn [results-map token]
+                     (tag-map token results-map next-line-indent))
+                   $
+                   value)
+                 (assoc! $ end-line
+                   (-> (get $ end-line [])
+                       (conj {:delimiter? true :column (dec end-column)})
+                       (conj {:end? true :column end-column :next-line-indent parent-indent})
+                       (conj {:end? true :column end-column})))))
+         (as-> results-map $
+               (assoc! $ line
+                 (conj (get $ line [])
+                   {:begin? true :column column :value value :indent indent :top-level? top-level?}))
+               (assoc! $ end-line
+                 (conj (get $ end-line [])
+                   {:end? true :column end-column}))))))))
 
-(def form->tags
-  (comp
-    (take-while some?)
-    (mapcat tag-list)))
-
-(s/defn code->tags :- [{Keyword Any}]
+(s/defn code->tags :- {Int {Keyword Any}}
   "Returns the tags for the given string containing code."
   [text :- Str]
   (let [reader (indexing-push-back-reader text)]
-    (into [] form->tags (repeatedly (partial read-safe reader)))))
-
-(s/defn get-line :- Int
-  "Returns the line number of the given tag, or -1 if none exists."
-  [tag :- {Keyword Any}]
-  (or (:line tag) (:end-line tag) -1))
-
-(s/defn get-column :- Int
-  "Returns the column number of the given tag, or -1 if none exists."
-  [tag :- {Keyword Any}]
-  (or (:column tag) (:end-column tag) -1))
+    (loop [m (transient {})]
+      (if-let [token (read-safe reader)]
+        (recur (tag-map token m))
+        (persistent! m)))))
 
 (s/defn get-tags-before-line :- [{Keyword Any}]
   "Returns the tags before the given line."
-  [tags :- [{Keyword Any}]
+  [tags :- {Int [{Keyword Any}]}
    line :- Int]
   (->> tags
-       (filter #(< (get-line %) (inc line)))
-       (sort-by get-line)))
+       (filter #(< (first %) line))
+       (sort-by first)
+       (map second)
+       (map #(sort-by :column %))
+       (apply concat)))
 
 (s/defn indent-for-line :- Int
   "Returns the number of spaces the given line should be indented."
-  [tags :- [{Keyword Any}]
-   cursor-line :- Int]
-  (or (->> tags
-           (take-while #(< (get-line %) (inc cursor-line)))
+  [tags :- {Int [{Keyword Any}]}
+   line :- Int]
+  (or (->> (get-tags-before-line tags line)
            reverse
            (some :next-line-indent))
     0))
 
 (s/defn back-indent-for-line :- Int
   "Returns the number of spaces the given line should be indented back."
-  [tags :- [{Keyword Any}]
-   cursor-line :- Int
+  [tags :- {Int [{Keyword Any}]}
+   line :- Int
    current-indent :- Int]
-  (let [tags-before (get-tags-before-line tags cursor-line)]
+  (let [tags-before (get-tags-before-line tags line)]
     (loop [tags (reverse tags-before)
            max-tab-stop current-indent]
       (if-let [tag (first tags)]
@@ -158,10 +163,10 @@
 
 (s/defn forward-indent-for-line :- Int
   "Returns the number of spaces the given line should be indented forward."
-  [tags :- [{Keyword Any}]
-   cursor-line :- Int
+  [tags :- {Int [{Keyword Any}]}
+   line :- Int
    current-indent :- Int]
-  (let [tags-before (get-tags-before-line tags cursor-line)]
+  (let [tags-before (get-tags-before-line tags line)]
     (loop [tags (reverse tags-before)
            max-tab-stop -1
            tab-stop -1]
