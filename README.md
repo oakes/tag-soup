@@ -2,11 +2,11 @@
 
 ## Introduction
 
-A Clojure and ClojureScript library that uses tools.reader to parse clojure code into a vector of maps describing each token. Example use:
+A Clojure and ClojureScript library that uses tools.reader to parse clojure code into maps that describe each token. The results come in one large map that organizes them by line number. Example use:
 
 ```clojure
 (code->tags "(+ 1 1)")
-; => [{:line 1, :column 1, :value (+ [1] [1]), :indent 0, :top-level? true, :skip-indent? true} {:line 1, :column 1, :delimiter? true} {:end-line 1, :end-column 2, :next-line-indent 3, :indent 3} {:line 1, :column 2, :value +, :indent 3, :top-level? false} {:end-line 1, :end-column 3, :end-tag? true} {:line 1, :column 4, :value 1, :indent 3, :top-level? false} {:end-line 1, :end-column 5, :end-tag? true} {:line 1, :column 6, :value 1, :indent 5, :top-level? false} {:end-line 1, :end-column 7, :end-tag? true} {:line 1, :column 7, :delimiter? true} {:end-line 1, :end-column 8, :next-line-indent 0} {:end-line 1, :end-column 8, :end-tag? true}]
+; => {1 [{:begin? true, :column 1, :value (+ [1] [1]), :indent 0, :top-level? true, :skip-indent? true} {:delimiter? true, :column 1} {:end? true, :column 2, :next-line-indent 3, :indent 3} {:begin? true, :column 2, :value +, :indent 3, :top-level? false} {:end? true, :column 3} {:begin? true, :column 4, :value 1, :indent 3, :top-level? false} {:end? true, :column 5} {:begin? true, :column 6, :value 1, :indent 5, :top-level? false} {:end? true, :column 7} {:delimiter? true, :column 7} {:end? true, :column 8, :next-line-indent 0} {:end? true, :column 8}]}
 ```
 
 ## Licensing
