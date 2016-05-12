@@ -116,7 +116,7 @@
                      (conj (get $ end-line [])
                        {:end? true :column end-column}))))))))))
 
-(s/defn code->tags :- {Int {Keyword Any}}
+(s/defn code->tags :- {Int [{Keyword Any}]}
   "Returns the tags for the given string containing code."
   [text :- Str]
   (let [reader (indexing-push-back-reader text)]
