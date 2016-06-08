@@ -16,5 +16,4 @@
   (repl :init-ns 'tag-soup.core))
 
 (deftask build []
-  (set-env! :source-paths #{"src"})
   (comp (cljs :optimizations :advanced) (target)))
