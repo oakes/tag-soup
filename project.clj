@@ -3,7 +3,7 @@
   :url "https://github.com/oakes/tag-soup"
   :license {:name "Public Domain"
             :url "http://unlicense.org/UNLICENSE"}
-  :dependencies [[org.clojars.oakes/tools.reader "1.0.0-2016.05.02"
+  :dependencies [[org.clojars.oakes/tools.reader "1.0.0-2016.07.01"
                   :exclusions [org.clojure/clojure]]
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.8.51"]
