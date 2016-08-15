@@ -1,3 +1,0 @@
-{:require  [tag-soup.core]
- :init-fns []
- :compiler-options {}}

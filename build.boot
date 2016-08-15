@@ -1,11 +1,11 @@
 (set-env!
   :source-paths #{"src"}
+  :resource-paths #{"src"}
   :dependencies '[[org.clojars.oakes/tools.reader "1.0.0-2016.07.01"
                    :exclusions [org.clojure/clojure]]
-                  [org.clojure/clojure "1.8.0"]
-                  [org.clojure/clojurescript "1.8.51"]
-                  [org.clojure/core.async "0.2.374"]
-                  [prismatic/schema "0.4.3"]]
+                  [org.clojure/clojure "1.9.0-alpha10"]
+                  [org.clojure/clojurescript "1.9.211"]
+                  [org.clojure/core.async "0.2.374"]]
   :repositories (conj (get-env :repositories)
                   ["clojars" {:url "https://clojars.org/repo/"
                               :username (System/getenv "CLOJARS_USER")
