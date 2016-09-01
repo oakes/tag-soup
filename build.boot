@@ -19,9 +19,6 @@
        :license {"Public Domain" "http://unlicense.org/UNLICENSE"}}
   push {:repo "clojars"})
 
-(deftask run-repl []
-  (repl :init-ns 'tag-soup.core))
-
 (deftask try []
   (comp (pom) (jar) (install)))
 
