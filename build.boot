@@ -1,7 +1,7 @@
 (set-env!
   :source-paths #{"src"}
   :resource-paths #{"src"}
-  :dependencies '[[org.clojars.oakes/tools.reader "1.0.0-2016.07.01"
+  :dependencies '[[org.clojars.oakes/tools.reader "1.0.0-2016.09.01"
                    :exclusions [org.clojure/clojure]]
                   [org.clojure/clojure "1.9.0-alpha11"]
                   [org.clojure/clojurescript "1.9.225"]
