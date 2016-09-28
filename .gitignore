@@ -4,6 +4,5 @@ pom.xml
 pom.xml.asc
 **/gen
 **/target
-*~
 .*
-resources/public/tag-soup.js
+!.gitignore
