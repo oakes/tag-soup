@@ -5,8 +5,7 @@
              :as r :refer [*wrap-value-and-add-metadata?*]]
             [#?(:clj oakclojure.tools.reader.reader-types
                 :cljs oakcljs.tools.reader.reader-types)
-             :refer [indexing-push-back-reader indexing-reader?]]
-            [clojure.spec :as s :refer [fdef]]))
+             :refer [indexing-push-back-reader indexing-reader?]]))
 
 (defn read-safe
   "Returns either a form or an exception object, or nil if EOF is reached."
@@ -171,46 +170,4 @@
         (if (<= tab-stop current-indent)
           (+ current-indent 2)
           tab-stop)))))
-
-; specs
-
-(fdef read-safe
-  :args (s/cat :reader indexing-reader?)
-  :ret (s/or :success (s/nilable some?) :failure #(instance? #?(:clj Exception :cljs js/Error) %)))
-
-(fdef unwrap-value
-  :args (s/cat :value any?)
-  :ret any?)
-
-(fdef adjust-indent
-  :args (s/cat :token any?)
-  :ret integer?)
-
-(fdef tag-map
-  :args (s/cat :token any? :results-map any? :parent-indent integer?)
-  :ret any?)
-
-(s/def ::tag (s/map-of keyword? any?))
-(s/def ::tags-for-line (s/coll-of ::tag))
-(s/def ::all-tags (s/map-of integer? ::tags-for-line))
-
-(fdef code->tags
-  :args (s/cat :text string?)
-  :ret ::all-tags)
-
-(fdef get-tags-before-line
-  :args (s/cat :tags ::all-tags :line integer?)
-  :ret ::tags-for-line)
-
-(fdef indent-for-line
-  :args (s/cat :tags ::all-tags :line integer?)
-  :ret integer?)
-
-(fdef back-indent-for-line
-  :args (s/cat :tags ::all-tags :line integer? :current-indent integer?)
-  :ret integer?)
-
-(fdef forward-indent-for-line
-  :args (s/cat :tags ::all-tags :line integer? :current-indent integer?)
-  :ret integer?)
 

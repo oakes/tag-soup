@@ -3,7 +3,7 @@
   :resource-paths #{"src"}
   :dependencies '[[org.clojars.oakes/tools.reader "1.0.0-2016.09.01"
                    :exclusions [org.clojure/clojure]]
-                  [org.clojure/clojure "1.9.0-alpha11"]
+                  [org.clojure/clojure "1.8.0"]
                   [org.clojure/clojurescript "1.9.225"]
                   [org.clojure/core.async "0.2.374"]]
   :repositories (conj (get-env :repositories)
