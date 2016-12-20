@@ -1,6 +1,9 @@
 (ns tag-soup.core-spec
   (:require [tag-soup.core :as c]
-            [clojure.spec :as s :refer [fdef]]))
+            [clojure.spec :as s :refer [fdef]]
+            [#?(:clj oakclojure.tools.reader.reader-types
+                :cljs oakcljs.tools.reader.reader-types)
+             :refer [indexing-reader?]]))
 
 (fdef c/read-safe
   :args (s/cat :reader indexing-reader?)
