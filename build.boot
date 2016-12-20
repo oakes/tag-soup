@@ -4,8 +4,8 @@
   :dependencies '[[org.clojars.oakes/tools.reader "1.0.0-2016.09.01"
                    :exclusions [org.clojure/clojure]]
                   [org.clojure/clojure "1.8.0"]
-                  [org.clojure/clojurescript "1.9.225" :scope "provided"]
-                  [org.clojure/core.async "0.2.374"]]
+                  [org.clojure/clojurescript "1.9.293" :scope "provided"]
+                  [org.clojure/core.async "0.2.395"]]
   :repositories (conj (get-env :repositories)
                   ["clojars" {:url "https://clojars.org/repo/"
                               :username (System/getenv "CLOJARS_USER")
