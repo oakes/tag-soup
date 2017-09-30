@@ -1,19 +1,21 @@
 (ns tag-soup.core
+  #?(:clj (:import clojure.lang.ExceptionInfo))
   (:require [clojure.string :as str]
             [#?(:clj oakclojure.tools.reader
                 :cljs oakcljs.tools.reader)
              :as r :refer [*wrap-value-and-add-metadata?*]]
             [#?(:clj oakclojure.tools.reader.reader-types
                 :cljs oakcljs.tools.reader.reader-types)
-             :refer [indexing-push-back-reader indexing-reader?]]))
+             :refer [indexing-push-back-reader]]))
 
 (defn read-safe
   "Returns either a form or an exception object, or nil if EOF is reached."
   [reader]
   (try
-    (binding [*wrap-value-and-add-metadata?* true]
+    (binding [*wrap-value-and-add-metadata?* true
+              *ns* (create-ns #?(:clj 'clj.user :cljs 'cljs.user))]
       (r/read {:read-cond :preserve :eof nil} reader))
-    (catch #?(:clj Exception :cljs js/Error) e e)))
+    (catch ExceptionInfo e e)))
 
 (def ^:const special-indent
   #{'-> '->>
@@ -55,12 +57,14 @@
   [token results-map parent-indent]
   (cond
     ; an error
-    (instance? #?(:clj Exception :cljs js/Error) token)
-    #?(:clj results-map
-       :cljs (let [{:keys [line column]} (.-data token)]
-               (assoc! results-map line
-                 (conj (get results-map line [])
-                   {:error? true :message (.-message token) :column column}))))
+    (instance? ExceptionInfo token)
+    (let [{:keys [line col]} (ex-data token)]
+      (assoc! results-map line
+        (conj (get results-map line [])
+          {:error? true
+           :message #?(:clj (.getMessage token)
+                       :cljs (.-message token))
+           :column col})))
     
     ; a key-value pair from a map
     (and (coll? token) (nil? (meta token)))
