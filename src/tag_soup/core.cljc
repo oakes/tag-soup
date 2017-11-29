@@ -39,7 +39,7 @@
     (let [first-val (-> token first unwrap-value)]
       (cond
         ; multi-arity functions
-        (vector? first-val)
+        (or (vector? first-val) (list? first-val))
         0
         ; :require and other keywords in ns
         (keyword? first-val)
