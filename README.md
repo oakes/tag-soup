@@ -9,6 +9,12 @@ A Clojure and ClojureScript library that uses tools.reader to parse clojure code
 ; => {1 [{:begin? true, :column 1, :value (+ [1] [1]), :indent 0, :top-level? true, :skip-indent? true} {:delimiter? true, :column 1} {:end? true, :column 2, :next-line-indent 3, :indent 3} {:begin? true, :column 2, :value +, :indent 3, :top-level? false} {:end? true, :column 3} {:begin? true, :column 4, :value 1, :indent 3, :top-level? false} {:end? true, :column 5} {:begin? true, :column 6, :value 1, :indent 5, :top-level? false} {:end? true, :column 7} {:delimiter? true, :column 7} {:end? true, :column 8, :next-line-indent 0} {:end? true, :column 8}]}
 ```
 
+## Building
+
+To experiment with this library in a REPL, you can use [the Clojure CLI tool](https://clojure.org/guides/getting_started#_clojure_installer_and_cli_tools). In this directory, run `clj` to start a Clojure REPL, or `clj -m cljs.repl.node` to start a ClojureScript REPL.
+
+To build an artifact, you can use [Boot](https://github.com/boot-clj/boot#install). In this directory, run `boot local` to install a local jar.
+
 ## Licensing
 
 All files that originate from this project are dedicated to the public domain. I would love pull requests, and will assume that they are also dedicated to the public domain.
