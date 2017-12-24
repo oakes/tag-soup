@@ -1,12 +1,17 @@
 (ns tag-soup.core
   #?(:clj (:import clojure.lang.ExceptionInfo))
-  (:require [clojure.string :as str]
+  (:require [clojure.spec.alpha :as s :refer [fdef]]
+            [clojure.string :as str]
             [#?(:clj oakclojure.tools.reader
                 :cljs oakcljs.tools.reader)
              :as r :refer [*wrap-value-and-add-metadata?*]]
             [#?(:clj oakclojure.tools.reader.reader-types
                 :cljs oakcljs.tools.reader.reader-types)
-             :refer [indexing-push-back-reader]]))
+             :refer [indexing-push-back-reader indexing-reader?]]))
+
+(fdef read-safe
+  :args (s/cat :reader indexing-reader?)
+  :ret (s/or :success (s/nilable some?) :failure #(instance? #?(:clj Exception :cljs js/Error) %)))
 
 (defn read-safe
   "Returns either a form or an exception object, or nil if EOF is reached."
@@ -27,10 +32,18 @@
     '= 'not= '==
     '> '< '>= '<=})
 
+(fdef unwrap-value
+  :args (s/cat :value any?)
+  :ret any?)
+
 (defn unwrap-value [value]
   (if (-> value meta :wrapped?)
     (first value)
     value))
+
+(fdef adjust-indent
+  :args (s/cat :token any?)
+  :ret integer?)
 
 (defn adjust-indent
   "Returns how much the indent should be adjusted for the given token."
@@ -51,6 +64,10 @@
         :else
         1))
     0))
+
+(fdef tag-map
+  :args (s/cat :token any? :results-map any? :parent-indent integer?)
+  :ret any?)
 
 (defn tag-map
   "Returns a transient map containing the tags, organized by line number."
@@ -111,6 +128,14 @@
                     (conj (get $ end-line [])
                       {:end? true :column end-column})))))))))
 
+(s/def ::tag (s/map-of keyword? any?))
+(s/def ::tags-for-line (s/coll-of ::tag))
+(s/def ::all-tags (s/map-of integer? ::tags-for-line))
+
+(fdef code->tags
+  :args (s/cat :text string?)
+  :ret ::all-tags)
+
 (defn code->tags
   "Returns the tags for the given string containing code."
   [text]
@@ -119,6 +144,10 @@
       (if-let [token (read-safe reader)]
         (recur (tag-map token m 0))
         (persistent! m)))))
+
+(fdef get-tags-before-line
+  :args (s/cat :tags ::all-tags :line integer?)
+  :ret ::tags-for-line)
 
 (defn get-tags-before-line
   "Returns the tags before the given line."
@@ -130,6 +159,10 @@
        (map #(sort-by :column %))
        (apply concat)))
 
+(fdef indent-for-line
+  :args (s/cat :tags ::all-tags :line integer?)
+  :ret integer?)
+
 (defn indent-for-line
   "Returns the number of spaces the given line should be indented."
   [tags line]
@@ -137,6 +170,10 @@
            reverse
            (some :next-line-indent))
     0))
+
+(fdef back-indent-for-line
+  :args (s/cat :tags ::all-tags :line integer? :current-indent integer?)
+  :ret integer?)
 
 (defn back-indent-for-line
   "Returns the number of spaces the given line should be indented back."
@@ -153,6 +190,10 @@
             (recur (rest tags) max-tab-stop))
           (recur (rest tags) max-tab-stop))
         (- current-indent 2)))))
+
+(fdef forward-indent-for-line
+  :args (s/cat :tags ::all-tags :line integer? :current-indent integer?)
+  :ret integer?)
 
 (defn forward-indent-for-line
   "Returns the number of spaces the given line should be indented forward."
