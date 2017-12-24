@@ -9,7 +9,7 @@
 
 (task-options!
   pom {:project 'tag-soup
-       :version "1.5.2"
+       :version "1.5.3-SNAPSHOT"
        :description "A library to parse code into a list of tags"
        :url "https://github.com/oakes/tag-soup"
        :license {"Public Domain" "http://unlicense.org/UNLICENSE"}}
