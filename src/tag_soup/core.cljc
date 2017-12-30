@@ -17,8 +17,7 @@
   "Returns either a form or an exception object, or nil if EOF is reached."
   [reader]
   (try
-    (binding [*wrap-value-and-add-metadata?* true
-              *ns* (create-ns #?(:clj 'clj.user :cljs 'cljs.user))]
+    (binding [*wrap-value-and-add-metadata?* true]
       (r/read {:read-cond :preserve :eof nil} reader))
     (catch ExceptionInfo e e)))
 
