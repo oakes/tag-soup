@@ -55,8 +55,11 @@
         (or (vector? first-val) (list? first-val))
         0
         ; :require and other keywords in ns
-        (keyword? first-val)
+        (#{:require :import :use} first-val)
         (inc (count (str first-val)))
+        ; reader conditionals
+        (#{:clj :cljs :cljr} first-val)
+        0
         ; threading macros
         (contains? special-indent first-val)
         (inc (count (str first-val)))
