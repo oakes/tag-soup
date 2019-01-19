@@ -28,7 +28,7 @@
 
 (task-options!
   pom {:project 'tag-soup
-       :version "1.6.0"
+       :version "1.6.1-SNAPSHOT"
        :description "A library to parse code into a list of tags"
        :url "https://github.com/oakes/tag-soup"
        :license {"Public Domain" "http://unlicense.org/UNLICENSE"}}
