@@ -17,7 +17,8 @@
   "Returns either a form or an exception object, or nil if EOF is reached."
   [reader]
   (try
-    (binding [*wrap-value-and-add-metadata?* true]
+    (binding [*wrap-value-and-add-metadata?* true
+              r/*suppress-read* true]
       (r/read {:read-cond :preserve :eof nil} reader))
     (catch ExceptionInfo e e)))
 
