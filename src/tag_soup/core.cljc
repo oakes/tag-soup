@@ -32,10 +32,6 @@
     '= 'not= '==
     '> '< '>= '<=})
 
-(fdef unwrap-value
-  :args (s/cat :value any?)
-  :ret any?)
-
 (defn unwrap-value [value]
   (if (-> value meta :wrapped?)
     (first value)
