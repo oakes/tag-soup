@@ -137,6 +137,18 @@
 
 (defn code->tags
   "Returns the tags for the given string containing code."
+  {:test (fn []
+           (doseq [code ["::a/hello"
+                         "{:a}"
+                         "#:hello{}"
+                         "#:hello{:a}"
+                         "#\"(?s)abc\""
+                         "#js {:a 1}"
+                         "(def ^{:doc \"hello\"} asdf)"]
+                   :let [tags (code->tags code)]]
+             (println)
+             (println code)
+             (println tags)))}
   [text]
   (let [reader (indexing-push-back-reader text)]
     (loop [m (transient {})]
