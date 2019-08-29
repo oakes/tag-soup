@@ -1,4 +1,4 @@
-[![Clojars Project](https://img.shields.io/clojars/v/tag-soup.svg)](https://clojars.org/tag-soup)
+## Note: This library is obsolete. You should use [parinferish](https://github.com/oakes/parinferish) to parse Clojure code.
 
 ## Introduction
 
